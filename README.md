@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tlevelled Chatbot
 
-## Getting Started
+This is a small Next.js chat app for TLevelled. It is not a vector database or a full RAG pipeline. The app uses prompt stuffing: it loads a local knowledge blob into the system prompt, then streams answers from Anthropic Claude.
 
-First, run the development server:
+That means there is no embeddings store, no retrieval step, and no chunk ranking logic here. The model gets the knowledge directly in the prompt and answers from that context only.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## How it works
+
+- [app/page.tsx](/Users/oluwatobisalawu/Documents/DATA/tlevelled-chatbot/app/page.tsx) renders the chat UI and uses `useChat` to send and receive messages.
+- [app/api/chat/route.ts](/Users/oluwatobisalawu/Documents/DATA/tlevelled-chatbot/app/api/chat/route.ts) receives the full conversation, injects the knowledge blob into the system prompt, and streams the model response back to the browser.
+- [app/knowledge.ts](/Users/oluwatobisalawu/Documents/DATA/tlevelled-chatbot/app/knowledge.ts) is the local knowledge source. It is ignored by git on purpose, so each clone can keep its own private content.
+
+In other words, the knowledge file is the app's source of truth, and the route simply packages it into the prompt. If you want true RAG later, you would add document chunking, embeddings, a retrieval layer, and a vector store instead of this direct prompt approach.
+
+## Setup
+
+1. Install dependencies with `npm install`.
+2. Create [`.env.local`](/Users/oluwatobisalawu/Documents/DATA/tlevelled-chatbot/.env.local) with your Anthropic API key.
+3. Create your own local knowledge file at [app/knowledge.js](/Users/oluwatobisalawu/Documents/DATA/tlevelled-chatbot/app/knowledge.js) or [app/knowledge.ts](/Users/oluwatobisalawu/Documents/DATA/tlevelled-chatbot/app/knowledge.ts) and export `TLEVEL_KNOWLEDGE`.
+4. Start the app with `npm run dev`.
+
+Example knowledge file:
+
+```js
+export const TLEVEL_KNOWLEDGE = `Your private course data here`;
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Notes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The assistant is instructed to answer only from the local knowledge content.
+- If the answer is not in that knowledge, it should say it does not know and point people back to TLevelled.
+- Keep the knowledge file out of git. That is why the repo ignores the local export.

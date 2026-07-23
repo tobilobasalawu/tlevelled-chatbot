@@ -12,6 +12,7 @@
 
 # Knowledge base - contains full course database export
 app/knowledge.ts
+app/knowledge.js
 
 # testing
 /coverage
