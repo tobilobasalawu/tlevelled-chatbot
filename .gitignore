@@ -10,6 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
+# Knowledge base - contains full course database export
+app/knowledge.ts
+
 # testing
 /coverage
 
